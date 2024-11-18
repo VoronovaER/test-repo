@@ -46,3 +46,9 @@ jobs:
       - name: Push Docker image
         run: |
           docker push my-app:${{ github.sha }}
+      
+      - name: Run Docker Compose
+        run: |
+          docker-compose -f /home/user/docker/application/docker-compose.yml up -d
+          docker-compose ps
+          docker-compose down
