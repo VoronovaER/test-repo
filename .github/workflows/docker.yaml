@@ -8,7 +8,7 @@ on:
     branches:
       - main
 
-variables:
+env:
   PROJECT_DIR: /home/user/docker/test-repo
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
         run: |
           cp -rf * $PROJECT_DIR
           cd $PROJECT_DIR
-          echo "Updating configuration..."
+          echo "Updating files..."
 
     
       # Set up Docker Buildx (for multi-platform builds)
@@ -41,9 +41,9 @@ jobs:
             ${{ runner.os }}-docker-
 
       # Build Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t my-app:${{ github.sha }} .
+      #- name: Build Docker image
+      #  run: |
+      #    docker build -t my-app:${{ github.sha }} .
 
       # Log in to DockerHub (optional, if pushing to DockerHub)
       #- name: Log in to DockerHub
@@ -55,10 +55,8 @@ jobs:
       # Push Docker image to DockerHub (optional)
       #- name: Push Docker image
       #  run: |
-          docker push my-app:${{ github.sha }}
+      #    docker push my-app:${{ github.sha }}
       
       - name: Run Docker Compose
         run: |
-          docker-compose -f /home/user/docker/application/docker-compose.yml up -d
-          docker-compose ps
-          docker-compose down
+          sudo docker-compose down &&  sudo docker-compose up -d --build --force-recreate
