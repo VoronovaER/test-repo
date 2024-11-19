@@ -9,7 +9,7 @@
 ################################################################################
 
 # Create a stage for resolving and downloading dependencies.
-FROM eclipse-temurin:21-jdk-jammy AS deps
+FROM eclipse-temurin:21-jdk-jammy as deps
 
 WORKDIR /build
 
@@ -31,7 +31,7 @@ RUN --mount=type=bind,source=pom.xml,target=pom.xml \
 # jar and instead relies on an application server like Apache Tomcat, you'll need to update this
 # stage with the correct filename of your package and update the base image of the "final" stage
 # use the relevant app server, e.g., using tomcat (https://hub.docker.com/_/tomcat/) as a base image.
-FROM deps AS package
+FROM deps as package
 
 WORKDIR /build
 
@@ -41,13 +41,6 @@ RUN --mount=type=bind,source=pom.xml,target=pom.xml \
     ./mvnw package -DskipTests && \
     mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar
 
-#RUN apt-get update -y && apt-get install -y
-#RUN apt-get install -y iputils-ping
-#RUN ip addr add 172.17.0.10 dev eth0
-#RUN apt-get install -y libtcnative-2
-#RUN /bin/sh -c "/sbin/ip addr add 172.17.0.10 dev eth0
-#RUN apt-get update \
-#    && apt-get -y install net-tools curl
 ################################################################################
 
 # Create a stage for extracting the application into separate layers.
@@ -55,7 +48,7 @@ RUN --mount=type=bind,source=pom.xml,target=pom.xml \
 # the packaged application into separate layers that can be copied into the final stage.
 # See Spring's docs for reference:
 # https://docs.spring.io/spring-boot/docs/current/reference/html/container-images.html
-FROM package AS extract
+FROM package as extract
 
 WORKDIR /build
 
@@ -94,6 +87,6 @@ COPY --from=extract build/target/extracted/spring-boot-loader/ ./
 COPY --from=extract build/target/extracted/snapshot-dependencies/ ./
 COPY --from=extract build/target/extracted/application/ ./
 
-EXPOSE 8000
+EXPOSE 8080
 
 ENTRYPOINT [ "java", "org.springframework.boot.loader.launch.JarLauncher" ]
