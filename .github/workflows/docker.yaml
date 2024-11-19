@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+variables:
+  PROJECT_DIR: /home/user/docker/test-repo
+
 jobs:
   build:
     runs-on: self-hosted
@@ -16,10 +19,17 @@ jobs:
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: Copy files
+        run: |
+          cp -rf * $PROJECT_DIR
+          cd $PROJECT_DIR
+          echo "Updating configuration..."
 
+    
       # Set up Docker Buildx (for multi-platform builds)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      #- name: Set up Docker Buildx
+      #  uses: docker/setup-buildx-action@v2
 
       # Cache Docker layers (optional, to speed up builds)
       - name: Cache Docker layers
@@ -36,15 +46,15 @@ jobs:
           docker build -t my-app:${{ github.sha }} .
 
       # Log in to DockerHub (optional, if pushing to DockerHub)
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      #- name: Log in to DockerHub
+      #  uses: docker/login-action@v2
+      #  with:
+      #    username: ${{ secrets.DOCKER_USERNAME }}
+      #    password: ${{ secrets.DOCKER_PASSWORD }}
 
       # Push Docker image to DockerHub (optional)
-      - name: Push Docker image
-        run: |
+      #- name: Push Docker image
+      #  run: |
           docker push my-app:${{ github.sha }}
       
       - name: Run Docker Compose
